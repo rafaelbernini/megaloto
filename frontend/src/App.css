@@ -338,9 +338,11 @@ body {
   border: 2px solid var(--card-border);
   border-radius: 32px;
   width: 100%;
-  max-width: 500px;
-  padding: 32px;
+  max-width: 440px;
+  padding: 24px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .calendar-title {
@@ -378,7 +380,7 @@ body {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .weekday-header {
@@ -452,3 +454,16 @@ body {
     width: 100%;
   }
 }
+/* Mobile Calendar Fix */
+@media (max-width: 480px) {
+  .modal-content { padding: 16px; border-radius: 20px; }
+  .calendar-grid { gap: 4px; }
+  .day-btn { font-size: 0.8rem; border-radius: 8px; }
+  .select-styled { padding: 6px; font-size: 0.85rem; }
+}
+
+/* Social Brand Colors */
+.action-btn[title='WhatsApp']:hover { background: #25D366 !important; color: #fff !important; }
+.action-btn[title='Facebook']:hover { background: #1877F2 !important; color: #fff !important; }
+.action-btn[title='Instagram']:hover { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important; color: #fff !important; }
+

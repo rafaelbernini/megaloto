@@ -184,10 +184,18 @@ function App() {
                 <div className="palpite-header">
                   <span className="palpite-tag">Jogo #{idx + 1}</span>
                   <div className="palpite-actions">
-                    <button className="action-btn" onClick={() => copyToClipboard(set)}>📋</button>
-                    <button className="action-btn" onClick={() => shareNumbers(set, 'whatsapp')}>💬</button>
-                    <button className="action-btn" onClick={() => shareNumbers(set, 'facebook')}>f</button>
-                    <button className="action-btn" onClick={() => shareNumbers(set, 'instagram')}>📸</button>
+                    <button className="action-btn" title="Copiar" onClick={() => copyToClipboard(set)}>
+                      <i className="fa-solid fa-copy"></i>
+                    </button>
+                    <button className="action-btn" title="WhatsApp" onClick={() => shareNumbers(set, 'whatsapp')}>
+                      <i className="fa-brands fa-whatsapp"></i>
+                    </button>
+                    <button className="action-btn" title="Facebook" onClick={() => shareNumbers(set, 'facebook')}>
+                      <i className="fa-brands fa-facebook"></i>
+                    </button>
+                    <button className="action-btn" title="Instagram" onClick={() => shareNumbers(set, 'instagram')}>
+                      <i className="fa-brands fa-instagram"></i>
+                    </button>
                   </div>
                 </div>
                 <div className="dezenas-container">

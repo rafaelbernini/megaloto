@@ -15,33 +15,25 @@ const AXIOS_OPTS = {
   },
   timeout: 10000
 };
+
 const isVirada = (item) => item?.indicadorConcursoEspecial === 1;
 
-// Último resultado
-app.get("/api/megasena/latest", async (req, res) => {
-  try {
-    const { data } = await axios.get(`${CAIXA_BASE}/megasena`, AXIOS_OPTS);
-    res.json({ latest: data, isVirada: isVirada(data) });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+const parseBrDate = (s) => {
+  if (!s || typeof s !== 'string') return null;
+  const parts = s.split('/');
+  if (parts.length !== 3) return null;
+  const [dd, mm, yyyy] = parts;
+  const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  return isNaN(d.getTime()) ? null : d;
+};
 
-// Resultado por concurso específico
-app.get("/api/megasena/:concurso", async (req, res) => {
-  try {
-    const { concurso } = req.params;
-    const { data } = await axios.get(`${CAIXA_BASE}/megasena/${concurso}`, AXIOS_OPTS);
-    res.json({ concurso: data, isVirada: isVirada(data) });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+const inRange = (d, from, to) => {
+  const t = d?.getTime?.();
+  return t != null && t >= from.getTime() && t <= to.getTime();
+};
 
-// Cache simples em memória
 const cache = new Map();
 
-// Helper para buscar com cache
 async function fetchWithCache(numero) {
   if (cache.has(numero)) return cache.get(numero);
   try {
@@ -50,84 +42,76 @@ async function fetchWithCache(numero) {
     cache.set(numero, result);
     return result;
   } catch (e) {
+    console.error(`Error fetching contest ${numero}:`, e.message);
     return null;
   }
 }
 
-// Histórico por período: otimizado com busca paralela
-app.get("/api/megasena/history", async (req, res) => {
+app.get("/api/megasena/latest", async (req, res) => {
   try {
-    const today = new Date();
-    const defaultFrom = new Date(today);
-    defaultFrom.setFullYear(defaultFrom.getFullYear() - 2);
-
-    const fromStr = req.query.from; // YYYY-MM-DD
-    const toStr = req.query.to; // YYYY-MM-DD
-
-    const from = fromStr ? new Date(fromStr) : defaultFrom;
-    const to = toStr ? new Date(toStr) : today;
-
-    const rangeFrom = from.getTime() <= to.getTime() ? from : defaultFrom;
-    const rangeTo = to.getTime() >= rangeFrom.getTime() ? to : today;
-
-    // Busca o último para saber o range total
-    const { data: latest } = await axios.get(`${CAIXA_BASE}/megasena`, AXIOS_OPTS);
-    const current = latest.numero;
-
-    const results = [];
-    const latestDate = parseBrDate(latest.dataApuracao);
-    if (inRange(latestDate, rangeFrom, rangeTo)) {
-      results.push({ item: latest, isVirada: isVirada(latest) });
-      cache.set(current, results[0]);
-    }
-
-    // Identifica quais números de concurso precisamos buscar
-    const queue = [];
-    for (let n = current - 1; n > 0 && queue.length < 500; n--) {
-        queue.push(n);
-    }
-
-    // Processa em lotes para não sobrecarregar
-    const BATCH_SIZE = 10;
-    for (let i = 0; i < queue.length; i += BATCH_SIZE) {
-      const batch = queue.slice(i, i + BATCH_SIZE);
-      const batchResults = await Promise.all(batch.map(numero => fetchWithCache(numero)));
-      
-      let reachedEnd = false;
-      for (const res of batchResults) {
-        if (!res) continue;
-        const d = parseBrDate(res.item?.dataApuracao);
-        if (d) {
-          if (d.getTime() < rangeFrom.getTime()) {
-            reachedEnd = true;
-            break;
-          }
-          if (inRange(d, rangeFrom, rangeTo)) {
-            results.push(res);
-          }
-        }
-      }
-      if (reachedEnd) break;
-    }
-
-    results.sort((a, b) => (b.item?.numero || 0) - (a.item?.numero || 0));
-    res.json(results);
+    const { data } = await axios.get(`${CAIXA_BASE}/megasena`, AXIOS_OPTS);
+    res.json({ latest: data, isVirada: isVirada(data) });
   } catch (e) {
-    res.status(200).json([]);
+    console.error("Latest error:", e.message);
+    res.status(500).json({ error: e.message });
   }
 });
 
-const port = process.env.PORT || 3001;
-app.listen(port, () => console.log(`Backend running on port ${port}`));
+app.get("/api/megasena/history", async (req, res) => {
+  const results = [];
+  try {
+    const today = new Date();
+    const defaultFrom = new Date(today);
+    defaultFrom.setFullYear(defaultFrom.getFullYear() - 1);
 
-const parseBrDate = (s) => {
-  if (!s || typeof s !== 'string') return null
-  const [dd, mm, yyyy] = s.split('/')
-  const d = new Date(Number(yyyy), Number(mm) - 1, Number(dd))
-  return isNaN(d.getTime()) ? null : d
-}
+    const from = req.query.from ? new Date(req.query.from) : defaultFrom;
+    const to = req.query.to ? new Date(req.query.to) : today;
 
-const inRange = (d, from, to) => {
-  const t = d?.getTime?.()
-  return t != null && t >= from.getTime() && t <= to.getTime()
-}
+    console.log(`History request: from=${from.toISOString()} to=${to.toISOString()}`);
+
+    const { data: latest } = await axios.get(`${CAIXA_BASE}/megasena`, AXIOS_OPTS);
+    const current = latest.numero;
+
+    const latestDate = parseBrDate(latest.dataApuracao);
+    if (latestDate && inRange(latestDate, from, to)) {
+      results.push({ item: latest, isVirada: isVirada(latest) });
+    }
+
+    const queue = [];
+    for (let n = current - 1; n > 0 && queue.length < 300; n--) {
+      queue.push(n);
+    }
+
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < queue.length; i += BATCH_SIZE) {
+      const batch = queue.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(batch.map(n => fetchWithCache(n)));
+
+      let stop = false;
+      for (const r of batchResults) {
+        if (!r) continue;
+        const d = parseBrDate(r.item?.dataApuracao);
+        if (d) {
+          if (d.getTime() < from.getTime()) {
+            stop = true;
+            break;
+          }
+          if (inRange(d, from, to)) {
+            results.push(r);
+          }
+        }
+      }
+      if (stop) break;
+    }
+
+    results.sort((a, b) => b.item.numero - a.item.numero);
+    console.log(`Returning ${results.length} history items`);
+    res.json(results);
+  } catch (e) {
+    console.error("History global error:", e.message);
+    res.status(200).json(results);
+  }
+});
+
+const port = 3001;
+app.listen(port, () => console.log(`Backend V2 running on port ${port}`));
