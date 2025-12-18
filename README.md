@@ -75,4 +75,20 @@ Encontrou um bug ou tem uma ideia para um algoritmo de sorte ainda mais poderoso
 
 ---
 
-**Boa sorte nos jogos! Que os deuses da probabilidade estejam com você! 🕊️💰**
+---
+
+## 🚀 Como Configurar na Vercel
+
+Este projeto já está configurado para ser implantado na Vercel como um Monorepo (Frontend + Backend).
+
+### Passos para Implantação:
+
+1. **Suba para o GitHub**: Garanta que todas as alterações (incluindo o arquivo `vercel.json`) estejam no seu repositório.
+2. **Importe na Vercel**: No dashboard da Vercel, clique em "Add New" -> "Project" e selecione seu repositório.
+3. **Configurações de Build**:
+   - **Root Directory**: `.` (deixe o padrão da raiz).
+   - A Vercel deve detectar automaticamente as configurações através do arquivo `vercel.json`.
+4. **Variáveis de Ambiente (Opcional)**:
+   - Se você quiser usar uma URL de API diferente em desenvolvimento, pode configurar `VITE_API_BASE` nas *Environment Variables*. Mas por padrão, ele usará a rota relativa `/api/megasena`.
+
+Pronto! Seu aplicativo estará online com o backend rodando como *Serverless Functions*. 🚀

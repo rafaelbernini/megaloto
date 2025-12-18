@@ -90,13 +90,13 @@ app.get("/api/megasena/history", async (req, res) => {
       let stop = false;
       for (const r of batchResults) {
         if (!r) continue;
-        const d = parseBrDate(r.item?.dataApuracao);
-        if (d) {
-          if (d.getTime() < from.getTime()) {
+        const rDate = parseBrDate(r.item?.dataApuracao);
+        if (rDate) {
+          if (rDate.getTime() < from.getTime()) {
             stop = true;
             break;
           }
-          if (inRange(d, from, to)) {
+          if (inRange(rDate, from, to)) {
             results.push(r);
           }
         }
@@ -113,5 +113,11 @@ app.get("/api/megasena/history", async (req, res) => {
   }
 });
 
-const port = 3001;
-app.listen(port, () => console.log(`Backend V2 running on port ${port}`));
+const port = process.env.PORT || 3001;
+// Apenas inicia o servidor se NÃO estiver na produção (Vercel)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => console.log(`Backend V2 running on port ${port}`));
+}
+
+// Exporta para a Vercel
+export default app;
