@@ -1,0 +1,5 @@
+/* minimal styles copied from frontend */
+.container{max-width:1000px;margin:0 auto;padding:20px}
+.header h1{margin:0}
+.dezenas-container{display:flex;gap:8px;flex-wrap:wrap}
+.ball{display:inline-block;background:#eee;border-radius:50%;width:40px;height:40px;line-height:40px;text-align:center}

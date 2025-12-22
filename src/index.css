@@ -1,0 +1,4 @@
+/* minimal copy of existing styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+:root{--bg:#fafafa;--card:#fff;--muted:#666}
+body{font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);margin:0}

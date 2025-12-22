@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "frontend/package.json",
+            "src": "package.json",
             "use": "@vercel/static-build",
             "config": {
                 "distDir": "dist"
@@ -14,8 +14,8 @@
             "handle": "filesystem"
         },
         {
-            "src": "/api/(.*)",
-            "dest": "/api/index.mjs"
+            "src": "/api/megasena/(.*)",
+            "dest": "/api/megasena.mjs"
         },
         {
             "src": "(.*)",
