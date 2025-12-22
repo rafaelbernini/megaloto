@@ -1,6 +1,25 @@
 {
   "version": 2,
   "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "functions": {
+    "api/*.mjs": { "runtime": "nodejs18.x" }
+  },
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "^/api/megasena(?:/(.*))?$", "dest": "/api/megasena.mjs" },
+    { "src": "^/api/(.*)", "dest": "/api/$1.mjs" },
+    { "src": "^(.*)$", "dest": "/index.html" }
+  ]
+}
+{
+  "version": 2,
+  "builds": [
     { "src": "package.json", "use": "@vercel/static-build" },
     { "src": "api/**/*.mjs", "use": "@vercel/node" }
   ],
