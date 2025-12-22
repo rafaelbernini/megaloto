@@ -69,6 +69,13 @@ function App() {
     try {
       const qs = new URLSearchParams({ from: fromDate, to: toDate }).toString()
       const res = await fetch(`${API_BASE}/history?${qs}`)
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`
+        try { const t = await res.text(); if (t) msg += ` - ${t}` } catch (e) {}
+        setError('Falha ao carregar dados: ' + msg)
+        setHistory([])
+        return
+      }
       const data = await res.json()
       setHistory(Array.isArray(data) ? data : [])
     } catch (e) {
@@ -144,6 +151,11 @@ function App() {
         <h1>Mega Loto da Sorte</h1>
         <p className="subtitle">Atraia a prosperidade com palpites baseados em dados reais.</p>
       </header>
+      {error && (
+        <div className="error-banner">
+          {error}
+        </div>
+      )}
 
       <section className="controls-card">
         <div className="controls-grid">

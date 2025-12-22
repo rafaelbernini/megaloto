@@ -3,3 +3,52 @@
 .header h1{margin:0}
 .dezenas-container{display:flex;gap:8px;flex-wrap:wrap}
 .ball{display:inline-block;background:#eee;border-radius:50%;width:40px;height:40px;line-height:40px;text-align:center}
+
+.error-banner{background:#ffe6e6;border:1px solid #ff9090;color:#700;padding:10px;border-radius:6px;margin:12px 0}
+
+/* Layout */
+.header{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.subtitle{color:var(--muted);margin:0}
+.controls-card{background:var(--card);padding:14px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:16px}
+.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+.control-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.input-styled{display:inline-block;padding:8px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer}
+input.input-styled{width:100%;box-sizing:border-box}
+
+/* Buttons */
+.btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
+.btn-primary{background:#2b7aeb;color:#fff}
+.btn-secondary{background:#f0f0f0;color:#222}
+
+/* Palpites */
+.palpite-section{margin:16px 0}
+.palpite-list{display:flex;flex-direction:column;gap:12px}
+.palpite-card{background:var(--card);padding:12px;border-radius:8px;display:flex;flex-direction:column;gap:8px}
+.palpite-header{display:flex;justify-content:space-between;align-items:center}
+.palpite-tag{font-weight:600}
+.palpite-actions{display:flex;gap:6px}
+.action-btn{background:transparent;border:0;cursor:pointer;padding:6px;font-size:16px}
+
+/* History */
+.history-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.history-card{background:var(--card);padding:12px;border-radius:8px;border:1px solid #eee}
+.history-card.virada{border-color:#ffcc00}
+.history-top{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.concurso-info{font-weight:600}
+.concurso-date{font-size:12px;color:var(--muted)}
+.badge-virada{background:#ffdd57;padding:4px 8px;border-radius:12px;font-weight:700}
+
+/* Modal / Calendar */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center}
+.modal-content{background:var(--card);padding:12px;border-radius:8px;min-width:320px}
+.calendar-header-styled{display:flex;gap:8px;margin-bottom:8px}
+.select-styled{padding:6px;border-radius:6px;border:1px solid #ddd}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.weekday-header{font-weight:700;text-align:center}
+.day-btn{padding:8px;border-radius:6px;border:0;background:transparent;cursor:pointer}
+.day-btn.not-in-month{visibility:hidden}
+.day-btn.active{background:#2b7aeb;color:#fff}
+
+@media (max-width:640px){
+	.controls-grid{grid-template-columns:1fr}
+}

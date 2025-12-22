@@ -31,15 +31,35 @@ const cache = new Map();
 
 async function fetchWithCache(numero) {
   if (cache.has(numero)) return cache.get(numero);
-  try {
-    const { data } = await axios.get(`${CAIXA_BASE}/megasena/${numero}`, AXIOS_OPTS);
-    const result = { item: data, isVirada: isVirada(data) };
-    cache.set(numero, result);
-    return result;
-  } catch (e) {
-    console.error(`Error fetching contest ${numero}:`, e.message);
-    return null;
+  const MAX_ATTEMPTS = 4;
+  const BASE_DELAY = 500; // ms
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const { data } = await axios.get(`${CAIXA_BASE}/megasena/${numero}`, AXIOS_OPTS);
+      const result = { item: data, isVirada: isVirada(data) };
+      cache.set(numero, result);
+      return result;
+    } catch (e) {
+      const status = e?.response?.status;
+      // If rate limited, wait an exponential backoff and retry
+      if (status === 429 && attempt < MAX_ATTEMPTS) {
+        const wait = BASE_DELAY * Math.pow(2, attempt - 1);
+        console.warn(`Rate limited fetching ${numero}, retry ${attempt}/${MAX_ATTEMPTS} after ${wait}ms`);
+        await new Promise((r) => setTimeout(r, wait));
+        continue;
+      }
+      // For other transient network errors we may also retry a couple times
+      if ((!status || status >= 500) && attempt < MAX_ATTEMPTS) {
+        const wait = BASE_DELAY * Math.pow(2, attempt - 1);
+        console.warn(`Transient error fetching ${numero} (status: ${status}). Retry ${attempt}/${MAX_ATTEMPTS} after ${wait}ms`);
+        await new Promise((r) => setTimeout(r, wait));
+        continue;
+      }
+      console.error(`Error fetching contest ${numero}:`, e.message || e);
+      return null;
+    }
   }
+  return null;
 }
 
 async function handleLatest(req, res) {
@@ -75,10 +95,12 @@ async function handleHistory(req, res, query) {
     const queue = [];
     for (let n = current - 1; n > 0 && queue.length < 300; n--) queue.push(n);
 
-    const BATCH_SIZE = 5;
+    const BATCH_SIZE = 3;
     for (let i = 0; i < queue.length; i += BATCH_SIZE) {
       const batch = queue.slice(i, i + BATCH_SIZE);
       const batchResults = await Promise.all(batch.map((n) => fetchWithCache(n)));
+      // gentle pause between batches to avoid hitting rate limits
+      await new Promise((r) => setTimeout(r, 150));
 
       let stop = false;
       for (const r of batchResults) {
