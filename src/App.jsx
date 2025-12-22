@@ -60,6 +60,7 @@ function App() {
 
   const [calDate, setCalDate] = useState(new Date())
   const [activeDateType, setActiveDateType] = useState('from')
+  const [isMobile, setIsMobile] = useState(false)
 
   const freq = useMemo(() => computeFrequencies(history), [history])
 
@@ -96,6 +97,13 @@ function App() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.matchMedia('(max-width:480px)').matches)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     fetchHistory()
@@ -157,6 +165,19 @@ function App() {
     setShowCalendar(false)
   }
 
+  // Mobile calendar: when on mobile, show native date inputs instead of modal calendar
+  const [mobileDateTemp, setMobileDateTemp] = useState(() => ({ from: fromDate, to: toDate }))
+
+  const openCalendarFor = (type) => {
+    setActiveDateType(type)
+    if (isMobile) {
+      setMobileDateTemp({ from: fromDate, to: toDate })
+      setShowCalendar(true)
+    } else {
+      setShowCalendar(true)
+    }
+  }
+
   return (
     <div className="container">
       <header className="header">
@@ -173,13 +194,13 @@ function App() {
         <div className="controls-grid">
           <div className="control-group">
             <label>Início do Período</label>
-            <button className="input-styled" onClick={() => { setActiveDateType('from'); setShowCalendar(true); }}>
+            <button className="input-styled" onClick={() => openCalendarFor('from')}>
               {fromDate.split('-').reverse().join('/')}
             </button>
           </div>
           <div className="control-group">
             <label>Fim do Período</label>
-            <button className="input-styled" onClick={() => { setActiveDateType('to'); setShowCalendar(true); }}>
+            <button className="input-styled" onClick={() => openCalendarFor('to')}>
               {toDate.split('-').reverse().join('/')}
             </button>
           </div>
@@ -188,6 +209,7 @@ function App() {
             <input
               type="number" className="input-styled" value={qtdPalpites}
               onChange={(e) => setQtdPalpites(e.target.value)} min="1" max="50"
+              inputMode="numeric" pattern="[0-9]*"
             />
           </div>
           <button className="btn btn-primary" onClick={gerarPalpite} disabled={loading}>
@@ -198,6 +220,18 @@ function App() {
           </button>
         </div>
       </section>
+
+      {/* Loading overlay with clover icon */}
+      {loading && (
+        <div className="loading-overlay" aria-live="polite">
+          <div className="loading-card">
+            <svg viewBox="0 0 64 64" className="icon-clover" aria-hidden="true">
+              <path d="M32 12c4 0 8 3 8 7s-4 8-8 8-8-4-8-8 4-7 8-7zM16 28c4 0 8 3 8 7s-4 8-8 8-8-4-8-8 4-7 8-7zM48 28c4 0 8 3 8 7s-4 8-8 8-8-4-8-8 4-7 8-7zM32 44c4 0 8 3 8 7s-4 8-8 8-8-4-8-8 4-7 8-7z" fill="#2b7aeb"/>
+            </svg>
+            <div className="loading-text">Carregando palpites...</div>
+          </div>
+        </div>
+      )}
 
       {palpites.length > 0 && (
         <section className="palpite-section">
@@ -252,26 +286,41 @@ function App() {
       {showCalendar && (
         <div className="modal-overlay" onClick={() => setShowCalendar(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="calendar-header-styled">
-              <select className="select-styled" value={calDate.getMonth()} onChange={e => setCalDate(new Date(calDate.getFullYear(), parseInt(e.target.value), 1))}>
-                {months.map((m, i) => <option key={m} value={i}>{m}</option>)}
-              </select>
-              <select className="select-styled" value={calDate.getFullYear()} onChange={e => setCalDate(new Date(parseInt(e.target.value), calDate.getMonth(), 1))}>
-                {years.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </div>
-            <div className="calendar-grid">
-              {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => <div key={d} className="weekday-header">{d}</div>)}
-              {monthMatrix.map((cell, i) => (
-                <button
-                  key={i} disabled={!cell.day}
-                  className={`day-btn ${!cell.day ? 'not-in-month' : ''} ${(activeDateType === 'from' ? fromDate : toDate) === cell.date?.toISOString().slice(0, 10) ? 'active' : ''}`}
-                  onClick={() => cell.day && handleDateSelect(cell.date)}
-                >
-                  {cell.day}
-                </button>
-              ))}
-            </div>
+            {isMobile ? (
+              <div className="mobile-date-picker">
+                <label>Início</label>
+                <input type="date" value={mobileDateTemp.from} onChange={e => setMobileDateTemp(s => ({ ...s, from: e.target.value }))} className="input-styled" />
+                <label>Fim</label>
+                <input type="date" value={mobileDateTemp.to} onChange={e => setMobileDateTemp(s => ({ ...s, to: e.target.value }))} className="input-styled" />
+                <div style={{display:'flex',gap:8,marginTop:8}}>
+                  <button className="btn btn-secondary" onClick={() => setShowCalendar(false)}>Cancelar</button>
+                  <button className="btn btn-primary" onClick={() => { setFromDate(mobileDateTemp.from); setToDate(mobileDateTemp.to); setShowCalendar(false); fetchHistory(); }}>OK</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="calendar-header-styled">
+                  <select className="select-styled" value={calDate.getMonth()} onChange={e => setCalDate(new Date(calDate.getFullYear(), parseInt(e.target.value), 1))}>
+                    {months.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                  </select>
+                  <select className="select-styled" value={calDate.getFullYear()} onChange={e => setCalDate(new Date(parseInt(e.target.value), calDate.getMonth(), 1))}>
+                    {years.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <div className="calendar-grid">
+                  {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => <div key={d} className="weekday-header">{d}</div>)}
+                  {monthMatrix.map((cell, i) => (
+                    <button
+                      key={i} disabled={!cell.day}
+                      className={`day-btn ${!cell.day ? 'not-in-month' : ''} ${(activeDateType === 'from' ? fromDate : toDate) === cell.date?.toISOString().slice(0, 10) ? 'active' : ''}`}
+                      onClick={() => cell.day && handleDateSelect(cell.date)}
+                    >
+                      {cell.day}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

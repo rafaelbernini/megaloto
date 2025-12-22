@@ -52,3 +52,52 @@ input.input-styled{width:100%;box-sizing:border-box}
 @media (max-width:640px){
 	.controls-grid{grid-template-columns:1fr}
 }
+
+/* Mobile improvements */
+@media (max-width:480px){
+	:root{--container-padding:12px}
+	.container{padding:12px}
+	.header h1{font-size:1.4rem}
+	.subtitle{font-size:0.95rem}
+
+	/* Make control buttons and inputs full width */
+	.controls-grid{grid-template-columns:1fr!important}
+	.btn{width:100%;display:inline-block}
+	.input-styled, input.input-styled{width:100%}
+
+	/* Smaller balls */
+	.ball{width:34px;height:34px;line-height:34px;font-size:14px}
+
+	/* Palpites: compact cards */
+	.palpite-list{gap:10px}
+	.palpite-card{padding:10px}
+	.palpite-actions{gap:4px}
+
+	/* History: single column stack */
+	.history-grid{grid-template-columns:1fr}
+	.history-card{padding:10px}
+
+	/* Modal / Calendar adjustments */
+	.modal-content{min-width:280px;width:92vw}
+	.calendar-grid{gap:4px}
+	.day-btn{padding:6px}
+
+	/* Reduce whitespace overall for mobile */
+	.controls-card, .palpite-card, .history-card{margin-bottom:10px}
+}
+
+/* Loading overlay */
+.loading-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999}
+.loading-overlay::before{content:"";position:absolute;inset:0;background:rgba(255,255,255,0.5);backdrop-filter:blur(6px)}
+.loading-card{position:relative;z-index:10000;display:flex;flex-direction:column;align-items:center;gap:10px;background:rgba(255,255,255,0.9);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.12)}
+.icon-clover{width:72px;height:72px}
+.loading-text{font-weight:700;color:#2b7aeb}
+
+.mobile-date-picker{display:flex;flex-direction:column;gap:8px}
+.mobile-date-picker label{font-size:12px;color:var(--muted)}
+.mobile-date-picker input[type="date"]{padding:8px;border-radius:6px;border:1px solid #ddd}
+
+/* Larger screens tweaks */
+@media (min-width:1200px){
+	.container{max-width:1200px}
+}
