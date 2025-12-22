@@ -63,6 +63,18 @@ function App() {
 
   const freq = useMemo(() => computeFrequencies(history), [history])
 
+  // Only show the "VIRADA" badge once (first virada in the list)
+  const historyWithViradaFlag = useMemo(() => {
+    let seen = false
+    return history.map((h) => {
+      if (h?.isVirada && !seen) {
+        seen = true
+        return { ...h, showVirada: true }
+      }
+      return { ...h, showVirada: false }
+    })
+  }, [history])
+
   async function fetchHistory() {
     setLoading(true)
     setError('')
@@ -222,11 +234,11 @@ function App() {
       <section>
         <h2 className="section-title">📊 Histórico</h2>
         <div className="history-grid">
-          {history.map(({ item, isVirada }) => (
+          {historyWithViradaFlag.map(({ item, isVirada, showVirada }) => (
             <div key={item.numero} className={`history-card ${isVirada ? 'virada' : ''}`}>
               <div className="history-top">
                 <span className="concurso-info">Concurso {item.numero}</span>
-                {isVirada && <span className="badge-virada">VIRADA</span>}
+                {showVirada && <span className="badge-virada">VIRADA</span>}
                 <span className="concurso-date">{item.dataApuracao}</span>
               </div>
               <div className="dezenas-container">
