@@ -3,12 +3,13 @@ import axios from 'axios';
 const CAIXA_BASE = 'https://servicebus2.caixa.gov.br/portaldeloterias/api';
 const AXIOS_OPTS = {
   headers: {
-    'User-Agent': 'Mozilla/5.0',
-    Accept: 'application/json, text/plain, */*',
-    Referer: 'https://loterias.caixa.gov.br/Paginas/Mega-Sena.aspx',
-    Origin: 'https://loterias.caixa.gov.br'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Referer': 'https://loterias.caixa.gov.br/',
+    'Origin': 'https://loterias.caixa.gov.br'
   },
-  timeout: 10000
+  timeout: 8000
 };
 
 const isVirada = (item) => item?.indicadorConcursoEspecial === 1;
@@ -93,14 +94,15 @@ async function handleHistory(req, res, query) {
     }
 
     const queue = [];
-    for (let n = current - 1; n > 0 && queue.length < 300; n--) queue.push(n);
+    // Limit to 200 contests total to ensure we stay under Vercel timeout (usually 10-15s)
+    for (let n = current - 1; n > 0 && queue.length < 200; n--) queue.push(n);
 
-    const BATCH_SIZE = 3;
+    const BATCH_SIZE = 8; // Fetch 8 at a time for better speed
     for (let i = 0; i < queue.length; i += BATCH_SIZE) {
       const batch = queue.slice(i, i + BATCH_SIZE);
       const batchResults = await Promise.all(batch.map((n) => fetchWithCache(n)));
-      // gentle pause between batches to avoid hitting rate limits
-      await new Promise((r) => setTimeout(r, 150));
+      // shorter pause as we fetch more in parallel
+      await new Promise((r) => setTimeout(r, 50));
 
       let stop = false;
       for (const r of batchResults) {
@@ -149,7 +151,7 @@ export default async function handler(req, res) {
     }
     // default: small info
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ ok: true, routes: ['/api/megasena/latest','/api/megasena/history'] }));
+    res.end(JSON.stringify({ ok: true, routes: ['/api/megasena/latest', '/api/megasena/history'] }));
   } catch (err) {
     console.error('Handler error:', err?.message || err);
     res.statusCode = 500;

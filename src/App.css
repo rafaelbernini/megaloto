@@ -450,3 +450,21 @@ input.input-styled {
 		max-width: 1200px
 	}
 }
+
+.btn-retry {
+	background: #fff;
+	border: 1px solid #700;
+	color: #700;
+	padding: 4px 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 600;
+	margin-top: 8px;
+	display: block
+}
+
+.btn-retry:hover {
+	background: #700;
+	color: #fff
+}

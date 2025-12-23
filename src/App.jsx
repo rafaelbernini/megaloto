@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/api/megasena'
+const API_BASE = '/api/megasena'
 
 function formatNumber(n) { return String(n).padStart(2, '0') }
 
@@ -108,7 +108,12 @@ export default function App() {
   return (
     <div className="container">
       <header className="header"><h1>Mega Loto da Sorte</h1><p className="subtitle">Atraia a prosperidade com palpites baseados em dados reais.</p></header>
-      {error && <div className="error-banner">{error}</div>}
+      {error && (
+        <div className="error-banner">
+          {error}
+          <button className="btn-retry" onClick={fetchHistory} style={{ marginLeft: 12 }}>Tentar Novamente</button>
+        </div>
+      )}
 
       <section className="controls-card"><div className="controls-grid">
         <div className="control-group"><label>Início do Período</label><button className="input-styled" onClick={openMobileDateModal}>{fromDate.split('-').reverse().join('/')}</button></div>
