@@ -1,5 +1,5 @@
 /* minimal styles copied from frontend */
-.container{max-width:1000px;margin:0 auto;padding:20px}
+.container{max-width:1000px;margin:0 auto;padding:var(--container-padding,20px)}
 .header h1{margin:0}
 .dezenas-container{display:flex;gap:8px;flex-wrap:wrap}
 .ball{display:inline-block;background:#eee;border-radius:50%;width:40px;height:40px;line-height:40px;text-align:center}
@@ -10,7 +10,7 @@
 .header{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
 .subtitle{color:var(--muted);margin:0}
 .controls-card{background:var(--card);padding:14px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:16px}
-.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end}
+.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;align-items:end}
 .control-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
 .input-styled{display:inline-block;padding:8px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer}
 input.input-styled{width:100%;box-sizing:border-box}
@@ -23,11 +23,16 @@ input.input-styled{width:100%;box-sizing:border-box}
 /* Palpites */
 .palpite-section{margin:16px 0}
 .palpite-list{display:flex;flex-direction:column;gap:12px}
-.palpite-card{background:var(--card);padding:12px;border-radius:8px;display:flex;flex-direction:column;gap:8px}
+.palpite-card{background:var(--card);padding:16px;border-radius:15px;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(0,0,0,0.05);box-shadow:0 4px 15px rgba(0,0,0,0.03);position:relative;overflow:hidden}
+.palpite-card::after{content:"🍀";position:absolute;bottom:-10px;right:-5px;font-size:40px;opacity:0.05;transform:rotate(-15deg)}
 .palpite-header{display:flex;justify-content:space-between;align-items:center}
 .palpite-tag{font-weight:600}
-.palpite-actions{display:flex;gap:6px}
-.action-btn{background:transparent;border:0;cursor:pointer;padding:6px;font-size:16px}
+.palpite-actions{display:flex;gap:10px;align-items:center}
+.btn-icon-sm{background:rgba(43,122,235,0.1);color:#2b7aeb;border:0;cursor:pointer;padding:8px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;box-shadow:0 2px 5px rgba(0,0,0,0.05)}
+.btn-icon-sm:hover{background:#2b7aeb;color:#fff;transform:translateY(-2px);box-shadow:0 4px 10px rgba(43,122,235,0.2)}
+.btn-icon-sm:active{transform:translateY(0)}
+.btn-whatsapp{background:rgba(37,211,102,0.1);color:#25d366}
+.btn-whatsapp:hover{background:#25d366;color:#fff;box-shadow:0 4px 10px rgba(37,211,102,0.3)}
 
 /* History */
 .history-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -54,7 +59,7 @@ input.input-styled{width:100%;box-sizing:border-box}
 }
 
 /* Mobile improvements */
-@media (max-width:480px){
+@media (max-width:720px){
 	:root{--container-padding:12px}
 	.container{padding:12px}
 	.header h1{font-size:1.4rem}
