@@ -67,10 +67,31 @@ export default function App() {
     try {
       const qs = new URLSearchParams({ from: fromDate, to: toDate }).toString()
       const res = await fetch(`${API_BASE}/history?${qs}`)
-      if (!res.ok) { let msg = `HTTP ${res.status}`; try { const t = await res.text(); if (t) msg += ` - ${t}` } catch (e) { }; setError('Falha ao carregar dados: ' + msg); setHistory([]); return }
+      if (!res.ok) {
+        let msg = `Erro ${res.status}`
+        try {
+          const t = await res.text()
+          if (t) {
+            // Check if it's a Vercel error or API error
+            if (t.includes('Vercel') || t.includes('DEPLOYMENT_NOT_FOUND')) {
+              msg += ' (Problema na Vercel: Verifique as rotas ou o deploy da API)'
+            } else {
+              msg += ` - ${t}`
+            }
+          }
+        } catch (e) { }
+        setError('Falha ao carregar dados: ' + msg)
+        setHistory([])
+        return
+      }
       const data = await res.json()
       setHistory(Array.isArray(data) ? data : [])
-    } catch (e) { setError('Falha ao carregar dados.') } finally { setLoading(false) }
+    } catch (e) {
+      console.error('Fetch error:', e)
+      setError('Falha na conexão: ' + (e.message || 'Erro desconhecido. Verifique se o servidor está online.'))
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { const check = () => setIsMobile(window.matchMedia('(max-width:720px)').matches); check(); window.addEventListener('resize', check); return () => window.removeEventListener('resize', check) }, [])
