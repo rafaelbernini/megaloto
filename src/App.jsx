@@ -118,7 +118,7 @@ export default function App() {
       <section className="controls-card"><div className="controls-grid">
         <div className="control-group"><label>Início do Período</label><button className="input-styled" onClick={openMobileDateModal}>{fromDate.split('-').reverse().join('/')}</button></div>
         <div className="control-group"><label>Fim do Período</label><button className="input-styled" onClick={openMobileDateModal}>{toDate.split('-').reverse().join('/')}</button></div>
-        <div className="control-group"><label>Quantidade</label><input type={isMobile ? 'tel' : 'number'} className="input-styled" value={qtdPalpites} onChange={(e) => setQtdPalpites(e.target.value.replace(/[^0-9]/g, ''))} min="1" max="50" inputMode="numeric" pattern="[0-9]*" /></div>
+        <div className="control-group"><label>Quantidade</label><input type={isMobile ? 'tel' : 'number'} className="input-styled" value={qtdPalpites} onChange={(e) => setQtdPalpites(e.target.value.replace(/[^0-9]/g, ''))} onFocus={() => setQtdPalpites('')} min="1" max="50" inputMode="numeric" pattern="[0-9]*" /></div>
         <button className="btn btn-primary" onClick={gerarPalpite} disabled={loading}>✨ Gerar Sorte</button>
         <button className="btn btn-secondary" onClick={fetchHistory} disabled={loading}>🔄 Atualizar</button>
       </div></section>
